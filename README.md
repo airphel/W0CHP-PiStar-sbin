@@ -6,7 +6,8 @@ Pi-Star files located in /usr/local/sbin
                HostFilesUpdate.sh Updater               
                                                         
        Written for Pi-Star (http://www.pistar.uk/)      
-                By Andy Taylor (MW0MWZ)                 
+                By Andy Taylor (MW0MWZ) 
+                  Modified by airphel
                    Enhanced by W0CHP                    
                      Version 2.10.7                  
                                                         
