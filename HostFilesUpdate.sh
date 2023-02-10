@@ -6,7 +6,7 @@
 #      Written for Pi-Star (http://www.pistar.uk/)      #
 #               By Andy Taylor (MW0MWZ)                 #
 #                  Enhanced by W0CHP                    #
-#                    Version 2.10.7                     #
+#                     Version 2.11                      #
 #                                                       #
 #   Based on the update script by Tony Corbett G0WFV    #
 #                                                       #
@@ -151,11 +151,18 @@ else
   curl --fail -L -o ${DExtraHOSTS} -s ${hostFileURL}/DExtra_Hosts.txt --user-agent "${uaStr}"
 fi
 
-# Grab DMR IDs but filter out IDs less than 7 digits (causing collisions with TGs of < 7 digits in "Target" column"
+# Grab DMR IDs
 curl --fail -L -o /tmp/DMRIds.tmp.bz2 -s ${hostFileURL}/DMRIds.dat.bz2 --user-agent "${uaStr}"
 bunzip2 -f /tmp/DMRIds.tmp.bz2
+# filter out IDs less than 7 digits (causing collisions with TGs of < 7 digits in "Target" column"
 cat /tmp/DMRIds.tmp  2>/dev/null | grep -v '^#' | awk '($1 > 999999) && ($1 < 10000000) { print $0 }' | sort -un -k1n -o ${DMRIDFILE}
 rm -f /tmp/DMRIds.tmp
+# radio ID DMR DB sanity checks
+NUMOFLINES=$(wc -l ${DMRIDFILE} | awk '{print $1}')
+if (( $NUMOFLINES < 230000 )) # revert file back to day before
+then
+    cp ${DMRIDFILE}.$(date +%Y%m%d) ${DMRIDFILE}
+fi
 
 curl --fail -L -o ${P25HOSTS} -s ${hostFileURL}/P25_Hosts.txt --user-agent "${uaStr}"
 curl --fail -L -o ${M17HOSTS} -s ${hostFileURL}/M17_Hosts.txt --user-agent "${uaStr}"
@@ -177,7 +184,7 @@ curl --fail -L -o ${TGLISTYSF} -s ${hostFileURL}/TGList_YSF.txt --user-agent "${
 curl --fail -L -o ${COUNTRIES} -s ${hostFileURL}/country.csv --user-agent "${uaStr}"
 curl --fail -L -o ${BMTGNAMES} -s ${hostFileURL}/BM_TGs.json --user-agent "${uaStr}"
 
-# live caller and nextion screens:
+# BM TG List for live caller and nextion screens:
 cp ${BMTGNAMES} ${GROUPSTXT}
 
 # If there is a DMR Over-ride file, add it's contents to DMR_Hosts.txt
@@ -267,11 +274,13 @@ if [ -d "/usr/local/etc/ircddbgateway" ]; then
 	fi
 fi
 
-# Nextion and LiveCaller DB's
+# Nextion and LiveCaller DMR ID DB's
 curl --fail -L -o ${RADIOIDDB}.bz2 -s ${hostFileURL}/user.csv.bz2 --user-agent "${uaStr}"
 bunzip2 -f ${RADIOIDDB}.bz2
-# strip first line of DMRdb and cleanup
-sed -e '1d' < /tmp/user.csv > ${STRIPPED}
+# sort
+cat /tmp/user.csv /tmp/stripped.csv 2>/dev/null | sort -un -k1n -o ${STRIPPED}
+# remove header
+sed -ie '1d' ${STRIPPED}
 mv ${RADIOIDDB} /usr/local/etc
 
 exit 0
