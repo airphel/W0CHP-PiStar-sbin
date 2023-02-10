@@ -9,7 +9,7 @@ Pi-Star files located in /usr/local/sbin
                 By Andy Taylor (MW0MWZ) 
                   Modified by airphel
                    Enhanced by W0CHP                    
-                     Version 2.10.7                  
+                     Version 2.11                
                                                         
     Based on the update script by Tony Corbett G0WFV    
                                                         
